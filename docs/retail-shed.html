@@ -1,0 +1,272 @@
+<title>retail-shed Estate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one wide estate drawing (HQ left, vrack0 NAT spine, stores right), then the
+   box's enrolment sequence and Fleet's per-store result as a reference table. */
+:root {
+  --bg: #f5f7f6;
+  --panel: #ffffff;
+  --ink: #17201c;
+  --muted: #5a6762;
+  --line: #c9d3cf;
+  --zone: #e9efec;
+  --accent: #1f8a5b;        /* the path that matters: VIP, agent dial-out */
+  --accent-soft: #d6efe3;
+  --wan: #b4561f;           /* WAN shaping / outage */
+  --display: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  --body: "Public Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111715; --panel: #18201d; --ink: #e4ebe8; --muted: #95a39d; --line: #33413b;
+    --zone: #1d2723; --accent: #4cc48b; --accent-soft: #1d3a2d; --wan: #e08a52; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111715; --panel: #18201d; --ink: #e4ebe8; --muted: #95a39d; --line: #33413b;
+  --zone: #1d2723; --accent: #4cc48b; --accent-soft: #1d3a2d; --wan: #e08a52; color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 32px 56px; display: grid; gap: 40px; }
+header { display: grid; gap: 8px; }
+.eyebrow { font: 500 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 700 clamp(30px, 5vw, 46px)/1.05 var(--display); margin: 0; text-wrap: balance; }
+h2 { font: 600 24px/1.2 var(--display); margin: 0 0 4px; text-wrap: balance; }
+p { margin: 0; max-width: 68ch; }
+.lede { color: var(--muted); font-size: 16px; }
+figure { margin: 0; display: grid; gap: 12px; }
+.scroll { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; }
+.scroll svg { display: block; width: 100%; min-width: 900px; height: auto; color: var(--ink); }
+figcaption { color: var(--muted); font-size: 14px; max-width: 80ch; }
+figcaption b { color: var(--ink); font-weight: 600; }
+svg text { font-family: var(--body); fill: currentColor; }
+svg .mono { font-family: var(--mono); }
+svg .disp { font-family: var(--display); font-weight: 600; }
+svg .muted { fill: var(--muted); }
+svg .acc { fill: var(--accent); }
+svg .wan { fill: var(--wan); }
+section { display: grid; gap: 16px; min-width: 0; }
+.grid2 { display: grid; gap: 40px; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+ol.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; counter-reset: s; }
+ol.steps li { counter-increment: s; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 12px; padding-block: 12px; border-top: 1px solid var(--line); }
+ol.steps li::before { content: counter(s); font: 600 20px/1.2 var(--display); color: var(--accent); }
+ol.steps b { font-weight: 600; }
+code { font: 13px var(--mono); background: var(--zone); padding: 1px 5px; border-radius: 3px; overflow-wrap: anywhere; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 11px/1.2 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip { display: inline-block; font: 500 12px/1 var(--mono); padding: 4px 7px; border-radius: 3px; border: 1px solid var(--line); margin: 0 4px 4px 0; }
+.chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+.note { font-size: 14px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">SUSE Edge retail lab · vrack0</div>
+    <h1>retail-shed estate</h1>
+    <p class="lede">An HQ Rancher cluster with no load-balancer VMs, five store sites on isolated networks, and one till app delivered to all of them from Git. Every store connection is outbound: nothing at HQ ever dials into a store.</p>
+  </header>
+
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 1200 712" role="img" aria-label="retail-shed topology. HQ: three RKE2 nodes running Rancher Prime; MetalLB announces VIP 172.16.0.251, shared by the kubernetes-vip service on 6443 and 9345, whose endpoints Endpoint Copier Operator copies from the apiservers, and by the ingress on 80 and 443. Fleet in Rancher polls the GitHub repo every 30 seconds. Five stores sit on separate libvirt NAT networks on vrack0, where wan.sh shapes each store's link. Store agents dial out through NAT to the VIP on 443, and store nodes pull the store-pos image from ghcr.io.">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
+          <marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
+        </defs>
+
+        <!-- Outside the lab -->
+        <rect x="40" y="14" width="190" height="46" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="135" y="34" text-anchor="middle" font-size="13" font-weight="600">Workstation</text>
+        <text x="135" y="51" text-anchor="middle" font-size="11" class="mono muted">/etc/hosts → .251</text>
+
+        <rect x="260" y="14" width="250" height="46" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="385" y="34" text-anchor="middle" font-size="13" font-weight="600">GitHub</text>
+        <text x="385" y="51" text-anchor="middle" font-size="11" class="mono muted">smclab0/retail-shed-fleet</text>
+
+        <rect x="860" y="14" width="250" height="46" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="985" y="34" text-anchor="middle" font-size="13" font-weight="600">ghcr.io</text>
+        <text x="985" y="51" text-anchor="middle" font-size="11" class="mono muted">smclab0/store-pos:1.0.0</text>
+
+        <!-- vrack0 -->
+        <rect x="20" y="84" width="1160" height="616" rx="6" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="6 5"/>
+        <text x="36" y="104" font-size="12" class="mono muted">vrack0 · KVM host 172.16.0.69 · 48 threads · 377 GB</text>
+
+        <!-- HQ zone -->
+        <rect x="40" y="116" width="470" height="568" rx="4" fill="var(--zone)"/>
+        <text x="56" y="138" font-size="15" class="disp">HQ · bridge br0 · 172.16.0.0/16</text>
+
+        <rect x="60" y="152" width="430" height="50" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="76" y="173" font-size="13" font-weight="600">Rancher Fleet</text>
+        <text x="76" y="191" font-size="11" class="mono muted">GitRepo retail-shed-stores · path fleet/store-pos</text>
+
+        <!-- VIP -->
+        <circle cx="275" cy="282" r="48" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="275" y="274" text-anchor="middle" font-size="12" class="mono">VIP</text>
+        <text x="275" y="292" text-anchor="middle" font-size="15" class="mono acc" font-weight="500">.251</text>
+        <text x="275" y="309" text-anchor="middle" font-size="10" class="mono muted">MetalLB L2</text>
+
+        <rect x="60" y="356" width="200" height="54" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="76" y="378" font-size="13" font-weight="600">kubernetes-vip</text>
+        <text x="76" y="397" font-size="11" class="mono muted">6443 api · 9345 join</text>
+        <rect x="290" y="356" width="200" height="54" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+        <text x="306" y="378" font-size="13" font-weight="600">ingress-nginx</text>
+        <text x="306" y="397" font-size="11" class="mono muted">80 · 443 → Rancher UI</text>
+        <line x1="248" y1="318" x2="172" y2="354" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#ara)"/>
+        <line x1="302" y1="318" x2="378" y2="354" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#ara)"/>
+        <text x="275" y="346" text-anchor="middle" font-size="10" class="mono muted">shared IP</text>
+
+        <!-- Rancher nodes -->
+        <g font-size="11">
+          <rect x="60" y="476" width="130" height="92" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+          <text x="72" y="497" font-weight="600" font-size="12">retail-rancher01</text>
+          <text x="72" y="515" class="mono muted">.133</text>
+          <rect x="210" y="476" width="130" height="92" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+          <text x="222" y="497" font-weight="600" font-size="12">retail-rancher02</text>
+          <text x="222" y="515" class="mono muted">.134</text>
+          <rect x="360" y="476" width="130" height="92" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+          <text x="372" y="497" font-weight="600" font-size="12">retail-rancher03</text>
+          <text x="372" y="515" class="mono muted">.135</text>
+          <text x="72" y="538" class="muted">RKE2 1.35.8</text><text x="72" y="555" class="muted">Rancher 2.15.2</text>
+          <text x="222" y="538" class="muted">RKE2 1.35.8</text><text x="222" y="555" class="muted">Rancher 2.15.2</text>
+          <text x="372" y="538" class="muted">RKE2 1.35.8</text><text x="372" y="555" class="muted">Rancher 2.15.2</text>
+        </g>
+        <path d="M160 412 L125 474 M160 412 L275 474 M160 412 L425 474" fill="none" stroke="currentColor" stroke-opacity=".6" marker-end="url(#ar)"/>
+        <text x="60" y="446" font-size="10" class="mono muted">ECO copies</text>
+        <text x="60" y="459" font-size="10" class="mono muted">apiserver endpoints</text>
+
+        <rect x="60" y="590" width="430" height="78" rx="4" fill="none" stroke="var(--line)" stroke-dasharray="3 3"/>
+        <text x="76" y="612" font-size="12" font-weight="600">If the announcing node dies</text>
+        <text x="76" y="630" font-size="11" class="muted">MetalLB re-announces .251 from a surviving node</text>
+        <text x="76" y="647" font-size="11" class="muted">(gratuitous ARP). No HAProxy or keepalived VMs.</text>
+        <text x="76" y="664" font-size="11" class="mono muted">Nodes 02 and 03 joined via https://.251:9345</text>
+
+        <!-- External arrows -->
+        <line x1="135" y1="62" x2="232" y2="246" stroke="currentColor" stroke-opacity=".7" marker-end="url(#ar)"/>
+        <text x="150" y="225" font-size="11" class="mono muted">HTTPS</text>
+        <line x1="385" y1="150" x2="385" y2="62" stroke="currentColor" stroke-opacity=".7" marker-end="url(#ar)"/>
+        <text x="393" y="110" font-size="11" class="mono muted">polls main · 30s</text>
+
+        <!-- NAT spine -->
+        <rect x="560" y="116" width="96" height="568" rx="4" fill="var(--zone)"/>
+        <text x="608" y="140" text-anchor="middle" font-size="13" class="disp">NAT</text>
+        <text x="608" y="158" text-anchor="middle" font-size="10" class="mono muted">nftables</text>
+        <text x="608" y="660" text-anchor="middle" font-size="10" class="mono wan">tc · wan.sh</text>
+        <text x="608" y="674" text-anchor="middle" font-size="10" class="mono muted">per bridge</text>
+
+        <!-- agents dial out: stores -> NAT -> VIP -->
+        <path d="M560 300 L330 290" fill="none" stroke="var(--accent)" stroke-width="2.2" marker-end="url(#ara)"/>
+        <text x="372" y="244" font-size="11" class="mono acc">cattle-cluster-agent</text>
+        <text x="372" y="259" font-size="11" class="mono acc">+ fleet-agent dial out</text>
+        <text x="372" y="274" font-size="11" class="mono acc">→ :443 (outbound only)</text>
+
+        <!-- image pull -->
+        <line x1="985" y1="62" x2="985" y2="112" stroke="currentColor" stroke-opacity=".7" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+        <text x="995" y="92" font-size="11" class="mono muted">image pull via NAT</text>
+
+        <!-- Stores -->
+        <g font-size="11">
+          <!-- row template: y, h=100 -->
+          <g transform="translate(680 116)">
+            <rect width="480" height="100" rx="4" fill="var(--panel)" stroke="var(--accent)"/>
+            <text x="16" y="26" font-size="15" class="disp">lon-001 · flagship</text>
+            <text x="16" y="45" class="mono muted">rtl-lon-001 · 10.120.1.0/24</text>
+            <text x="16" y="62" class="muted">london · price ×1.12</text>
+            <g class="mono"><rect x="16" y="72" width="40" height="20" rx="3" fill="var(--zone)"/><text x="36" y="86" text-anchor="middle">n1</text>
+            <rect x="62" y="72" width="40" height="20" rx="3" fill="var(--zone)"/><text x="82" y="86" text-anchor="middle">n2</text>
+            <rect x="108" y="72" width="40" height="20" rx="3" fill="var(--zone)"/><text x="128" y="86" text-anchor="middle">n3</text></g>
+            <text x="156" y="86" class="muted">K3s HA etcd</text>
+            <rect x="320" y="26" width="64" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="352" y="42" text-anchor="middle" class="mono">till</text>
+            <rect x="392" y="26" width="72" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="428" y="42" text-anchor="middle" class="mono">collect</text>
+          </g>
+          <g transform="translate(680 228)">
+            <rect width="480" height="84" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <text x="16" y="26" font-size="15" class="disp">lon-002</text>
+            <text x="16" y="45" class="mono muted">rtl-lon-002 · 10.120.2.0/24</text>
+            <text x="16" y="66" class="muted">london · price ×1.12 · 1 × K3s</text>
+            <rect x="320" y="26" width="64" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="352" y="42" text-anchor="middle" class="mono">till</text>
+          </g>
+          <g transform="translate(680 324)">
+            <rect width="480" height="84" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <text x="16" y="26" font-size="15" class="disp">man-001</text>
+            <text x="16" y="45" class="mono muted">rtl-man-001 · 10.120.3.0/24</text>
+            <text x="16" y="66" class="muted">manchester · base prices · 1 × K3s</text>
+            <rect x="320" y="26" width="64" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="352" y="42" text-anchor="middle" class="mono">till</text>
+          </g>
+          <g transform="translate(680 420)">
+            <rect width="480" height="84" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <text x="16" y="26" font-size="15" class="disp">edi-001</text>
+            <text x="16" y="45" class="mono muted">rtl-edi-001 · 10.120.4.0/24</text>
+            <text x="16" y="66" class="muted">edinburgh · own banner · 1 × K3s</text>
+            <rect x="320" y="26" width="64" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="352" y="42" text-anchor="middle" class="mono">till</text>
+          </g>
+          <g transform="translate(680 516)">
+            <rect width="480" height="84" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <text x="16" y="26" font-size="15" class="disp">bri-001</text>
+            <text x="16" y="45" class="mono muted">rtl-bri-001 · 10.120.5.0/24</text>
+            <text x="16" y="66" class="muted">bristol · base prices · 1 × K3s</text>
+            <rect x="320" y="26" width="64" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="352" y="42" text-anchor="middle" class="mono">till</text>
+          </g>
+          <!-- store bridges into the NAT spine, each with its own tc qdisc -->
+          <g stroke="var(--wan)" stroke-width="1.5">
+            <line x1="680" y1="166" x2="656" y2="166"/><line x1="680" y1="270" x2="656" y2="270"/>
+            <line x1="680" y1="366" x2="656" y2="366"/><line x1="680" y1="462" x2="656" y2="462"/>
+            <line x1="680" y1="558" x2="656" y2="558"/>
+          </g>
+          <g fill="var(--wan)">
+            <rect x="664" y="161" width="8" height="10"/><rect x="664" y="265" width="8" height="10"/>
+            <rect x="664" y="361" width="8" height="10"/><rect x="664" y="457" width="8" height="10"/>
+            <rect x="664" y="553" width="8" height="10"/>
+          </g>
+          <text x="680" y="626" class="mono muted">Stores can't reach each other; libvirt drops forwarding between store networks.</text>
+          <text x="680" y="643" class="mono muted">Each store router (.1) answers rancher.retail-shed.local with .251.</text>
+          <text x="680" y="660" class="mono wan">Orange marks: tc on each rtl-* bridge (delay, loss, rate, outage).</text>
+        </g>
+      </svg>
+    </div>
+    <figcaption><b>Every arrow into HQ starts at a store, and none starts at HQ.</b> Store agents dial out through vrack0's NAT to the VIP, so Rancher manages each store, and Fleet delivers the till to it, over connections the store opened. MetalLB holds <code>172.16.0.251</code> inside the HQ cluster, shared by the Kubernetes and RKE2 join ports and the Rancher ingress. Endpoint Copier Operator keeps the VIP pointing at every live apiserver.</figcaption>
+  </figure>
+
+  <div class="grid2">
+    <section>
+      <div>
+        <h2>How a box joins a store</h2>
+        <p class="note">One image, <code>retail-store.iso</code>, is used for every box. The box gets its identity from the SMBIOS serial at first boot.</p>
+      </div>
+      <ol class="steps">
+        <li><div><b>HQ creates the store record.</b> <code>setup-stores.sh</code> makes an empty K3s cluster <code>store-man-001</code> labelled with store, region and tier.</div></li>
+        <li><div><b>Combustion installs the enrolment service</b> on first boot: HQ CA anchor, read-only token in <code>/etc</code>, program in <code>/usr/libexec</code>.</div></li>
+        <li><div><b>The box names itself</b> from its serial, <code>store-man-001-n1</code>, and trusts the HQ CA.</div></li>
+        <li><div><b>It waits for its record</b> and reads the registration command with a token that can only list clusters and registration tokens. It retries through WAN outages.</div></li>
+        <li><div><b>It runs the verified command</b> (CA checksum, no <code>--insecure</code>) with all roles. Rancher installs K3s v1.35.8 and the agents.</div></li>
+        <li><div><b>Fleet sees the new cluster's labels</b> and deploys store-pos with that store's values.</div></li>
+      </ol>
+    </section>
+
+    <section>
+      <div>
+        <h2>What Fleet gives each store</h2>
+        <p class="note">One bundle covers the whole estate. Values come from cluster labels, and <code>targetCustomizations</code> match on region (first match wins).</p>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Store</th><th>Region · tier</th><th>Apps</th><th>Prices</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">lon-001</td><td>london · flagship</td><td><span class="chip on">till</span><span class="chip on">collect</span></td><td>×1.12, London banner</td></tr>
+            <tr><td class="mono">lon-002</td><td>london · standard</td><td><span class="chip on">till</span></td><td>×1.12, London banner</td></tr>
+            <tr><td class="mono">man-001</td><td>manchester · standard</td><td><span class="chip on">till</span></td><td>base list</td></tr>
+            <tr><td class="mono">edi-001</td><td>edinburgh · standard</td><td><span class="chip on">till</span></td><td>base list, Scottish produce banner</td></tr>
+            <tr><td class="mono">bri-001</td><td>bristol · standard</td><td><span class="chip on">till</span></td><td>base list</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">The till keeps selling when <code>wan.sh outage</code> cuts a store off. It shows <b>HQ offline - trading locally</b> and counts the sales it made offline.</p>
+    </section>
+  </div>
+</div>

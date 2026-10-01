@@ -1,12 +1,13 @@
 [Unit]
 Description=Enrol this store box with Rancher HQ
 Wants=network-online.target
-After=network-online.target
+# The agent installer runs systemctl, which needs the system bus
+After=network-online.target dbus.service
 ConditionPathExists=!/var/lib/retail-enrol/done
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/retail-enrol
+ExecStart=/usr/libexec/retail-enrol
 RemainAfterExit=yes
 TimeoutStartSec=infinity
 

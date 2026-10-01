@@ -41,6 +41,11 @@ done
 # The HQ CA is in the system trust store, so this is the verified (non-insecure) command
 bash -c "${cmd} --etcd --controlplane --worker --label retail.lab/store=${store}"
 
+# The installer only logs a failed systemctl call (seen once on a first boot
+# when the system bus was not up yet), so make sure the agent really runs
+systemctl enable --now rancher-system-agent.service
+systemctl is-active --quiet rancher-system-agent.service
+
 install -d -m 0700 "$STATE"
 date -Iseconds >"${STATE}/done"
 echo "box ${serial}: registered with ${cluster}"

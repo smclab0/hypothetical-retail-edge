@@ -173,6 +173,18 @@ Day 2:
   - On 2026-10-01, Cloudflare served a stale cached `repomd.xml` for the RKE2 1.35 repo next
     to the fresh signature for v1.35.9, so EIB refused the repo with "Signature verification
     failed".
+- **Where combustion can write.** On SL Micro, `/usr/local`, `/opt`, `/var` and `/home` are
+  separate subvolumes mounted over the snapshot that combustion writes. Anything a custom script
+  puts there is hidden after boot. Use `/usr/libexec` or `/etc`, and create parent directories
+  (`install -D`).
+  When any combustion script fails, the box stops at "Press Enter for system maintenance
+  (or press Control-D to continue)". To see why, type `journalctl -u combustion` in that
+  emergency shell. The serial console works: `virsh console <vm>` on vrack0.
+- **Agent install races D-Bus on first boot.** On one box, the agent installer ran
+  `systemctl` before the system bus was up. It only logged "Failed to connect to system scope
+  bus" and left `rancher-system-agent` disabled, so the box never finished joining. The
+  enrolment service now starts after `dbus.service`, enables the agent itself, and marks the
+  box enrolled only when the agent is running.
 - **One EIB directory per image** (`eib/rancher`, `eib/store`). EIB installs every RPM in a
   directory's `rpms/` into every image built from that directory.
 - **Self-installer.** The SL Micro self-installer never powers off; it installs and boots into
@@ -186,8 +198,19 @@ Day 2:
 - **Coexistence.** demo-shed and hf-shed are not running. retail-shed uses VIP .251, so it can
   coexist with demo-shed (.252) on br0.
 
-## Next phase
+## Store app (Fleet)
 
-Retail demo apps (POS, inventory, pricing) delivered with Fleet GitOps to the
-store clusters, targeted with the `retail.lab/*` labels (e.g. flagship-only services,
-regional price lists).
+[smclab0/retail-shed-fleet](https://github.com/smclab0/retail-shed-fleet) holds **store-pos**:
+a till app with a click & collect board for flagship stores. GitHub Actions builds
+`ghcr.io/smclab0/store-pos`, and the Fleet bundle in that repo deploys it to every store.
+
+- **One bundle for every store.** Fleet fills each store's identity from its cluster labels.
+  London stores get a 1.12 price multiplier, and only `tier=flagship` gets `/collect/`.
+- **Register it once** on the Rancher cluster: `kubectl apply -f fleet/gitrepo.yaml` (from that
+  repo). Fleet polls `main` every 30 s.
+- **Open a till** from a workstation: `ssh -L 8080:10.120.3.11:80 root@172.16.0.69`, then
+  browse to http://localhost:8080/.
+- **Offline trading.** With `./wan.sh outage man-001`, the till shows "HQ offline - trading
+  locally" and keeps selling. Sales made offline are counted.
+
+The diagram of the whole estate is in [`docs/retail-shed.html`](docs/retail-shed.html).
