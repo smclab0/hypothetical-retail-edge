@@ -34,8 +34,8 @@ snapshot() { # prefix vm
   local k8s
   k8s=$(k8s_cmd "$2")
   echo "$1 etcd snapshot on $2"
-  run "$1" ssh_node "$2" "PATH=\$PATH:/usr/local/bin:/opt/rke2/bin
-    ${k8s} etcd-snapshot save --name pre-shutdown-\$(date +%Y%m%d-%H%M) >/dev/null" ||
+  run "$1" ssh_node "$2" "PATH=\$PATH:/usr/local/bin:/opt/bin:/opt/rke2/bin
+    ${k8s} etcd-snapshot save --name pre-shutdown-\$(date +%Y%m%d-%H%M) >/dev/null 2>&1" ||
     echo "$1 WARNING: snapshot on $2 failed, continuing" >&2
 }
 
