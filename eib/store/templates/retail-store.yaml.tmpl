@@ -1,0 +1,35 @@
+apiVersion: 1.2
+image:
+  arch: x86_64
+  imageType: iso
+  baseImage: SL-Micro.x86_64-6.2-Default-SelfInstall-GM.install.iso
+  outputImageName: retail-store.iso
+operatingSystem:
+  isoConfiguration:
+    installDevice: /dev/sda
+  time:
+    timezone: Europe/London
+  kernelArgs:
+    - net.ifnames=1
+    - console=ttyS0,115200n8
+    - nomodeset
+    - textmode=1
+  systemd:
+    disable:
+      - rebootmgr
+      - transactional-update.timer
+      - transactional-update-cleanup.timer
+  users:
+    - username: root
+      encryptedPassword: ${ROOT_PASSWORD_HASH}
+      createHomeDir: true
+      sshKeys:
+        - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC4irtPu6k+J4lgDcX7iNWgpU0iLD0mmK0rBiTCW2qH+wQD8flQp1W51tAmEwKe7/wRhJW7U+1KOrLwgo/lPc6E8wiN9k9zFEWndU4uA+LQrrKh3rsq+AEmaM9jfLWnqU00KMSP51ngEyKMxJ6yqN9y4sy8GlqlcxgdYkcAuwQ7CrckjA7RD1j+Uo/QjlHaIgD3+inZ14Zn756Dk+Zw9IRfw1arkX/DOwNuxr78KFHN4xui31JWPPwjPVl1S+YzwZ2jp/94ayZvQkfF5fRukhHGx1kblvKc53Gne/fVaQW3WDVqjmp2fxMb2OYzPH/RBxYDK/j+tqFYYuetACxGdM43iZNgqTn8QW3UOW7k1uMWPyoNbq2E/9L+vsNGccUmlVTpITJZURvuDytrT/O6+8ma4GNCwTjGy3DbkeyE/5Mb7jxbXGG5aw1VgaRYlcMVogB5QeGzbXeLjeqocAIW8if1HbqovsntjW5DHEJ+kEsJbAVtVL2GNAnciP6mnAw5Z6s= steve@smclappy0.local
+  packages:
+    packageList:
+      - jq
+      - openssh-server-config-rootlogin
+      - k3s-selinux
+    # k3s-selinux is side-loaded from eib/store/rpms (signature checked against
+    # rpms/gpg-keys): its rpm.rancher.io repo has unsigned metadata
+    sccRegistrationCode: ${SCC_REG_CODE}

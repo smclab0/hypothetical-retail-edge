@@ -1,0 +1,10 @@
+interfaces:
+- name: enp1s0
+  type: ethernet
+  state: up
+  mac-address: 52:54:00:7e:00:22
+  ipv4:
+    enabled: true
+    dhcp: true
+  ipv6:
+    enabled: false

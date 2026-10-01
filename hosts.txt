@@ -1,0 +1,4 @@
+# Written by discover-ips.sh 2026-10-01T15:04:40+01:00
+retail-rancher01   172.16.0.133
+retail-rancher02   172.16.0.134
+retail-rancher03   172.16.0.135

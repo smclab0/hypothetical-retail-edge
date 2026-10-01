@@ -1,0 +1,14 @@
+[Unit]
+Description=Enrol this store box with Rancher HQ
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=!/var/lib/retail-enrol/done
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/retail-enrol
+RemainAfterExit=yes
+TimeoutStartSec=infinity
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+# name               mac                role     network
+retail-rancher01     52:54:00:7e:00:21  rancher  br0
+retail-rancher02     52:54:00:7e:00:22  rancher  br0
+retail-rancher03     52:54:00:7e:00:23  rancher  br0
+store-lon-001-n1     52:54:00:7e:01:01  store    rtl-lon-001
+store-lon-001-n2     52:54:00:7e:01:02  store    rtl-lon-001
+store-lon-001-n3     52:54:00:7e:01:03  store    rtl-lon-001
+store-lon-002-n1     52:54:00:7e:02:01  store    rtl-lon-002
+store-man-001-n1     52:54:00:7e:03:01  store    rtl-man-001
+store-edi-001-n1     52:54:00:7e:04:01  store    rtl-edi-001
+store-bri-001-n1     52:54:00:7e:05:01  store    rtl-bri-001

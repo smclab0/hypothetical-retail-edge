@@ -1,0 +1,6 @@
+# store    region      tier      net   (store LAN = 10.120.<net>.0/24, libvirt network + bridge rtl-<store>)
+lon-001    london      flagship  1
+lon-002    london      standard  2
+man-001    manchester  standard  3
+edi-001    edinburgh   standard  4
+bri-001    bristol     standard  5

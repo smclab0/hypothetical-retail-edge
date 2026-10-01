@@ -1,0 +1,16 @@
+# Secrets
+credentials.env
+eib/secrets.env
+pki/*.key
+eib/store/custom/files/enrol.env
+# Copied from pki/ca.pem by render-eib.sh
+eib/store/custom/files/retail-shed-ca.pem
+# Rendered from eib/*/templates (contain secrets)
+eib/*/retail-*.yaml
+# Side-loaded RPMs (fetch-rpms.sh downloads and verifies them)
+eib/*/rpms/*.rpm
+# EIB build inputs/outputs
+eib/*/base-images/
+eib/*/_build/
+*.iso
+eib/*/build.log
