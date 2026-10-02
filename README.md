@@ -8,29 +8,11 @@ its own isolated LAN behind a simulated WAN link.
 
 ## Topology
 
-```mermaid
-flowchart TB
-    ws["Workstation<br/>/etc/hosts: rancher.retail-shed.local → 172.16.0.251"]
+![retail-shed topology: HQ Rancher with an in-cluster MetalLB VIP, six isolated store networks behind NAT, Liverpool on the HQ LAN with an iPhone opening its till](docs/retail-shed.svg)
 
-    subgraph vrack0["vrack0 · KVM host 172.16.0.69"]
-        br0{{"br0 · HQ LAN 172.16.0.0/16 · DHCP"}}
-        subgraph hq["HQ · retail-rancher01..03 · RKE2 1.35.8 + Rancher Prime 2.15.2"]
-            vip(("VIP 172.16.0.251<br/>MetalLB L2 · shared IP"))
-            kv["kubernetes-vip svc<br/>6443 · 9345<br/>endpoints copied by ECO"]
-            ing["ingress controller svc<br/>80 · 443 → Rancher"]
-            vip --- kv & ing
-        end
-        subgraph stores["Stores · each on its own libvirt NAT network (tc = WAN)"]
-            s1["rtl-lon-001 · 10.120.1.0/24<br/>flagship · 3 × K3s"]
-            s2["rtl-lon-002 · 10.120.2.0/24<br/>1 × K3s"]
-            s3["rtl-man-001 · 10.120.3.0/24<br/>1 × K3s"]
-            s4["rtl-edi-001 · 10.120.4.0/24<br/>1 × K3s"]
-            s5["rtl-bri-001 · 10.120.5.0/24<br/>1 × K3s"]
-        end
-    end
-    ws --> br0 --- vip
-    s1 & s2 & s3 & s4 & s5 -- "NAT via vrack0 · outbound only" --> vip
-```
+The same drawing, with the enrolment steps and what Fleet gives each store, is in
+[`docs/retail-shed.html`](docs/retail-shed.html). After editing that page, run
+`python3 docs/export-svg.py` to regenerate the image above.
 
 | Role | Hosts | Image | vCPU / RAM / disk | Network |
 |---|---|---|---|---|
