@@ -198,6 +198,42 @@ Day 2:
 - **Coexistence.** demo-shed and hf-shed are not running. retail-shed uses VIP .251, so it can
   coexist with demo-shed (.252) on br0.
 
+## Kiosk store (Glasgow)
+
+`gla-001` (tier `kiosk`) is a store whose box has a screen. It runs **SLES 16 with GNOME**
+instead of SL Micro. The till opens full-screen in Firefox on that screen, while the box
+runs K3s and enrols like any other store.
+
+- **Install:** Agama installs unattended from `SLES-16.0-Full-x86_64-QU0.install.iso`
+  (on vrack0 in `/var/lib/libvirt/images/`), offline and without SCC registration.
+  `render-kiosk.sh` builds the profile `agama/kiosk/retail-kiosk.json`. `create-vms.sh` serves
+  it on `http://10.120.6.1:8099` (Glasgow's LAN only) for the length of the install and boots
+  the installer with `inst.auto=…`.
+- **Same enrolment.** The profile's post-install script unpacks the same `retail-enrol`
+  service, token and HQ CA as the store image, adds `k3s-selinux` and switches firewalld off
+  (the store LAN is already isolated).
+- **Kiosk session:**
+  - GDM logs the `kiosk` user in automatically.
+  - The GNOME autostart entry `retail-kiosk-launcher` shows a holding page until the box's
+    till answers on `/healthz`, then keeps `firefox --kiosk http://<box IP>/` open and
+    restarts it if it closes.
+  - dconf locks out screen blanking and the lock screen; Firefox policies turn off
+    first-run pages.
+- **Watching the screen:** the VM has a virtio GPU and a USB tablet. On vrack0, run
+  `virsh vncdisplay store-gla-001-n1`, then tunnel that port with `ssh -L`.
+- **Limits:** the SLES media has no `gnome-kiosk`, Chromium or `cage`, so this is full GNOME
+  with a kiosk browser rather than a locked single-app shell; keyboard shortcuts still work.
+- **Gotcha: Agama patterns.** Give `software.patterns` as `{"add": [...]}`. A plain list replaces
+  the product's default patterns. The first build used `["gnome"]`, which dropped the `selinux`
+  pattern, and the box booted with `security=` (empty) on the kernel command line, so SELinux
+  was off despite `SELINUX=enforcing` in `/etc/selinux/config`.
+
+```bash
+./create-networks.sh && ./setup-stores.sh gla-001
+./render-kiosk.sh
+./create-vms.sh store-gla-001-n1     # waits for the Agama install (~15-20 min)
+```
+
 ## Store app (Fleet)
 
 [smclab0/retail-shed-fleet](https://github.com/smclab0/retail-shed-fleet) holds **store-pos**:

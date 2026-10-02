@@ -70,12 +70,12 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
   <header>
     <div class="eyebrow">SUSE Edge retail lab · vrack0</div>
     <h1>retail-shed estate</h1>
-    <p class="lede">An HQ Rancher cluster with no load-balancer VMs, five store sites on isolated networks, and one till app delivered to all of them from Git. Every store connection is outbound: nothing at HQ ever dials into a store.</p>
+    <p class="lede">An HQ Rancher cluster with no load-balancer VMs, six store sites on isolated networks, and one till app delivered to all of them from Git. Every store connection is outbound: nothing at HQ ever dials into a store.</p>
   </header>
 
   <figure>
     <div class="scroll">
-      <svg viewBox="0 0 1200 712" role="img" aria-label="retail-shed topology. HQ: three RKE2 nodes running Rancher Prime; MetalLB announces VIP 172.16.0.251, shared by the kubernetes-vip service on 6443 and 9345, whose endpoints Endpoint Copier Operator copies from the apiservers, and by the ingress on 80 and 443. Fleet in Rancher polls the GitHub repo every 30 seconds. Five stores sit on separate libvirt NAT networks on vrack0, where wan.sh shapes each store's link. Store agents dial out through NAT to the VIP on 443, and store nodes pull the store-pos image from ghcr.io.">
+      <svg viewBox="0 0 1200 808" role="img" aria-label="retail-shed topology. HQ: three RKE2 nodes running Rancher Prime; MetalLB announces VIP 172.16.0.251, shared by the kubernetes-vip service on 6443 and 9345, whose endpoints Endpoint Copier Operator copies from the apiservers, and by the ingress on 80 and 443. Fleet in Rancher polls the GitHub repo every 30 seconds. Six stores sit on separate libvirt NAT networks on vrack0, where wan.sh shapes each store's link. Store agents dial out through NAT to the VIP on 443, and store nodes pull the store-pos image from ghcr.io.">
         <defs>
           <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
           <marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
@@ -95,11 +95,11 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
         <text x="985" y="51" text-anchor="middle" font-size="11" class="mono muted">smclab0/store-pos:1.0.0</text>
 
         <!-- vrack0 -->
-        <rect x="20" y="84" width="1160" height="616" rx="6" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="6 5"/>
+        <rect x="20" y="84" width="1160" height="712" rx="6" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="6 5"/>
         <text x="36" y="104" font-size="12" class="mono muted">vrack0 · KVM host 172.16.0.69 · 48 threads · 377 GB</text>
 
         <!-- HQ zone -->
-        <rect x="40" y="116" width="470" height="568" rx="4" fill="var(--zone)"/>
+        <rect x="40" y="116" width="470" height="664" rx="4" fill="var(--zone)"/>
         <text x="56" y="138" font-size="15" class="disp">HQ · bridge br0 · 172.16.0.0/16</text>
 
         <rect x="60" y="152" width="430" height="50" rx="4" fill="var(--panel)" stroke="var(--line)"/>
@@ -154,11 +154,11 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
         <text x="393" y="110" font-size="11" class="mono muted">polls main · 30s</text>
 
         <!-- NAT spine -->
-        <rect x="560" y="116" width="96" height="568" rx="4" fill="var(--zone)"/>
+        <rect x="560" y="116" width="96" height="664" rx="4" fill="var(--zone)"/>
         <text x="608" y="140" text-anchor="middle" font-size="13" class="disp">NAT</text>
         <text x="608" y="158" text-anchor="middle" font-size="10" class="mono muted">nftables</text>
-        <text x="608" y="660" text-anchor="middle" font-size="10" class="mono wan">tc · wan.sh</text>
-        <text x="608" y="674" text-anchor="middle" font-size="10" class="mono muted">per bridge</text>
+        <text x="608" y="756" text-anchor="middle" font-size="10" class="mono wan">tc · wan.sh</text>
+        <text x="608" y="770" text-anchor="middle" font-size="10" class="mono muted">per bridge</text>
 
         <!-- agents dial out: stores -> NAT -> VIP -->
         <path d="M560 300 L330 290" fill="none" stroke="var(--accent)" stroke-width="2.2" marker-end="url(#ara)"/>
@@ -213,20 +213,28 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
             <text x="16" y="66" class="muted">bristol · base prices · 1 × K3s</text>
             <rect x="320" y="26" width="64" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="352" y="42" text-anchor="middle" class="mono">till</text>
           </g>
+          <g transform="translate(680 612)">
+            <rect width="480" height="84" rx="4" fill="var(--panel)" stroke="var(--line)"/>
+            <text x="16" y="26" font-size="15" class="disp">gla-001 · kiosk</text>
+            <text x="16" y="45" class="mono muted">rtl-gla-001 · 10.120.6.0/24</text>
+            <text x="16" y="66" class="muted">glasgow · SLES 16 + GNOME · 1 × K3s</text>
+            <rect x="320" y="26" width="64" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="352" y="42" text-anchor="middle" class="mono">till</text>
+            <rect x="392" y="26" width="72" height="24" rx="3" fill="var(--zone)" stroke="var(--line)"/><text x="428" y="42" text-anchor="middle" class="mono">screen</text>
+          </g>
           <!-- store bridges into the NAT spine, each with its own tc qdisc -->
           <g stroke="var(--wan)" stroke-width="1.5">
             <line x1="680" y1="166" x2="656" y2="166"/><line x1="680" y1="270" x2="656" y2="270"/>
             <line x1="680" y1="366" x2="656" y2="366"/><line x1="680" y1="462" x2="656" y2="462"/>
-            <line x1="680" y1="558" x2="656" y2="558"/>
+            <line x1="680" y1="558" x2="656" y2="558"/><line x1="680" y1="654" x2="656" y2="654"/>
           </g>
           <g fill="var(--wan)">
             <rect x="664" y="161" width="8" height="10"/><rect x="664" y="265" width="8" height="10"/>
             <rect x="664" y="361" width="8" height="10"/><rect x="664" y="457" width="8" height="10"/>
-            <rect x="664" y="553" width="8" height="10"/>
+            <rect x="664" y="553" width="8" height="10"/><rect x="664" y="649" width="8" height="10"/>
           </g>
-          <text x="680" y="626" class="mono muted">Stores can't reach each other; libvirt drops forwarding between store networks.</text>
-          <text x="680" y="643" class="mono muted">Each store router (.1) answers rancher.retail-shed.local with .251.</text>
-          <text x="680" y="660" class="mono wan">Orange marks: tc on each rtl-* bridge (delay, loss, rate, outage).</text>
+          <text x="680" y="722" class="mono muted">Stores can't reach each other; libvirt drops forwarding between store networks.</text>
+          <text x="680" y="739" class="mono muted">Each store router (.1) answers rancher.retail-shed.local with .251.</text>
+          <text x="680" y="756" class="mono wan">Orange marks: tc on each rtl-* bridge (delay, loss, rate, outage).</text>
         </g>
       </svg>
     </div>
@@ -237,7 +245,7 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
     <section>
       <div>
         <h2>How a box joins a store</h2>
-        <p class="note">One image, <code>retail-store.iso</code>, is used for every box. The box gets its identity from the SMBIOS serial at first boot.</p>
+        <p class="note">One image, <code>retail-store.iso</code>, is used for every SL Micro box. The Glasgow kiosk installs SLES 16 with GNOME through an unattended Agama profile that carries the same enrolment service. Every box gets its identity from the SMBIOS serial at first boot.</p>
       </div>
       <ol class="steps">
         <li><div><b>HQ creates the store record.</b> <code>setup-stores.sh</code> makes an empty K3s cluster <code>store-man-001</code> labelled with store, region and tier.</div></li>
@@ -263,6 +271,7 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
             <tr><td class="mono">man-001</td><td>manchester · standard</td><td><span class="chip on">till</span></td><td>base list</td></tr>
             <tr><td class="mono">edi-001</td><td>edinburgh · standard</td><td><span class="chip on">till</span></td><td>base list, Scottish produce banner</td></tr>
             <tr><td class="mono">bri-001</td><td>bristol · standard</td><td><span class="chip on">till</span></td><td>base list</td></tr>
+            <tr><td class="mono">gla-001</td><td>glasgow · kiosk</td><td><span class="chip on">till</span><span class="chip">on screen</span></td><td>base list; Firefox kiosk on the box's display</td></tr>
           </tbody>
         </table>
       </div>

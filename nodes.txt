@@ -9,3 +9,4 @@ store-lon-002-n1     52:54:00:7e:02:01  store    rtl-lon-002
 store-man-001-n1     52:54:00:7e:03:01  store    rtl-man-001
 store-edi-001-n1     52:54:00:7e:04:01  store    rtl-edi-001
 store-bri-001-n1     52:54:00:7e:05:01  store    rtl-bri-001
+store-gla-001-n1     52:54:00:7e:06:01  kiosk    rtl-gla-001

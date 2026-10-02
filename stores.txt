@@ -4,3 +4,4 @@ lon-002    london      standard  2
 man-001    manchester  standard  3
 edi-001    edinburgh   standard  4
 bri-001    bristol     standard  5
+gla-001    glasgow     kiosk     6

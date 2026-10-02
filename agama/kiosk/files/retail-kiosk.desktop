@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Store kiosk
+Exec=/usr/libexec/retail-kiosk-launcher
+X-GNOME-Autostart-enabled=true
+NoDisplay=true
