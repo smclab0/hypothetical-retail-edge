@@ -14,7 +14,12 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 HSSH="ssh -o BatchMode=yes ${HYPERVISOR}"
 
-targets() { if [ "$1" = all ]; then stores; else store_field "$1" 1 | grep . || { echo "unknown store $1" >&2; exit 1; }; fi; }
+targets() {
+  if [ "$1" = all ]; then isolated_stores; return; fi
+  store_field "$1" 1 | grep -q . || { echo "unknown store $1" >&2; exit 1; }
+  [ "$(store_field "$1" 4)" != lan ] || { echo "$1 is on the HQ LAN: there is no store link to shape" >&2; exit 1; }
+  echo "$1"
+}
 
 shape() { # store netem-args [rate]
   local br="rtl-$1" gw="${STORE_NET_PREFIX}.$(store_field "$1" 4).1" netem=$2 rate=${3:-10gbit}
@@ -30,7 +35,7 @@ shape() { # store netem-args [rate]
 
 case "${1:-status}" in
   status)
-    for s in $(stores); do
+    for s in $(isolated_stores); do
       q=$($HSSH "tc qdisc show dev rtl-${s} 2>/dev/null" | awk '$2 == "netem" { sub(/.*limit [0-9]+ /, ""); sub(/ seed [0-9]+/, ""); print; exit }')
       r=$($HSSH "tc class show dev rtl-${s} 2>/dev/null | awk '/1:20/ { for (i=1;i<=NF;i++) if (\$i==\"rate\") print \$(i+1) }' || true")
       [ "$r" = 10Gbit ] && r=""

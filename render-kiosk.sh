@@ -25,7 +25,7 @@ trap 'rm -rf "$stage"' EXIT
 S="${stage}/usr/share/retail-kiosk"
 install -D -m 0644 "${DIR}/pki/ca.pem" "${stage}/etc/pki/trust/anchors/retail-shed-ca.pem"
 install -d -m 0700 "${stage}/etc/retail-enrol"
-printf 'RANCHER_URL=%s\nENROL_TOKEN=%s\n' "$RANCHER_URL" "$ENROL_TOKEN" >"${stage}/etc/retail-enrol/enrol.env"
+printf 'RANCHER_URL=%s\nRANCHER_VIP=%s\nENROL_TOKEN=%s\n' "$RANCHER_URL" "$VIP" "$ENROL_TOKEN" >"${stage}/etc/retail-enrol/enrol.env"
 chmod 0600 "${stage}/etc/retail-enrol/enrol.env"
 install -D -m 0755 "${STORE}/custom/files/retail-enrol.sh" "${stage}/usr/libexec/retail-enrol"
 install -D -m 0644 "${STORE}/custom/files/retail-enrol.service" "${stage}/etc/systemd/system/retail-enrol.service"

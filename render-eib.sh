@@ -28,7 +28,7 @@ if [ "$which" = store ]; then
   fi
   files="${DIR}/eib/store/custom/files"
   cp "${DIR}/pki/ca.pem" "${files}/retail-shed-ca.pem"
-  (umask 077; printf 'RANCHER_URL=%s\nENROL_TOKEN=%s\n' "$RANCHER_URL" "$ENROL_TOKEN" >"${files}/enrol.env")
+  (umask 077; printf 'RANCHER_URL=%s\nRANCHER_VIP=%s\nENROL_TOKEN=%s\n' "$RANCHER_URL" "$VIP" "$ENROL_TOKEN" >"${files}/enrol.env")
   echo "==> ${files}/enrol.env, retail-shed-ca.pem"
 fi
 

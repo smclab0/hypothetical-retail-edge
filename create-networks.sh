@@ -11,7 +11,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 DRY_RUN=false
 [ "${1:-}" = --dry-run ] && DRY_RUN=true
 
-for s in $(stores); do
+for s in $(isolated_stores); do
   net=$(store_field "$s" 4)
   name="rtl-${s}"
   hosts=""

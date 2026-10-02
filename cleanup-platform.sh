@@ -41,7 +41,7 @@ for role in rancher; do has_role "$role" && VMS+=($(nodes_of_role "$role")); don
 
 echo "This permanently deletes on ${HYPERVISOR#root@}:"
 printf '  %s\n' "${VMS[@]}"
-has_role networks && printf '  network rtl-%s\n' $(stores)
+has_role networks && printf '  network rtl-%s\n' $(isolated_stores)
 if ! $DRY_RUN && ! $YES; then
   read -rp "Type 'delete' to continue: " answer
   [ "$answer" = delete ] || { echo "Aborted."; exit 1; }
@@ -91,7 +91,7 @@ done
 
 if has_role networks; then
   echo "==> Deleting store networks"
-  for s in $(stores); do
+  for s in $(isolated_stores); do
     $SSH "$HYPERVISOR" "virsh net-info rtl-${s}" &>/dev/null || continue
     echo "    rtl-${s}"
     run $SSH "$HYPERVISOR" "virsh net-destroy rtl-${s} >/dev/null; virsh net-undefine rtl-${s} >/dev/null"

@@ -81,6 +81,23 @@ fi
 [ -n "$K3S_VERSION" ] || { echo "ERROR: Rancher offers no v1.35 K3s; set K3S_VERSION" >&2; exit 1; }
 echo "==> Store clusters run K3s ${K3S_VERSION}"
 
+# K3s CoreDNS imports *.server keys from kube-system/coredns-custom. A store
+# router answers the Rancher name already; on the HQ LAN nothing does, so every
+# store cluster carries this zone and its agents' pods resolve it anywhere.
+COREDNS_CUSTOM="apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns-custom
+  namespace: kube-system
+data:
+  retail-shed.server: |
+    ${RANCHER_FQDN#*.}:53 {
+      hosts {
+        ${VIP} ${RANCHER_FQDN}
+        fallthrough
+      }
+    }"
+
 for s in "${SEL[@]}"; do
   region=$(store_field "$s" 2)
   tier=$(store_field "$s" 3)
@@ -92,11 +109,11 @@ for s in "${SEL[@]}"; do
   fi
   echo "    ${c}: creating (${region}, ${tier}, $(store_nodes "$s" | wc -l) node(s))"
   api POST /v1/provisioning.cattle.io.clusters "$(jq -n --arg name "$c" --arg ver "$K3S_VERSION" \
-    --arg store "$s" --arg region "$region" --arg tier "$tier" '{
+    --arg store "$s" --arg region "$region" --arg tier "$tier" --arg dns "$COREDNS_CUSTOM" '{
       type: "provisioning.cattle.io.cluster",
       metadata: {name: $name, namespace: "fleet-default",
         labels: {"retail.lab/store": $store, "retail.lab/region": $region, "retail.lab/tier": $tier}},
-      spec: {kubernetesVersion: $ver, rkeConfig: {}}
+      spec: {kubernetesVersion: $ver, rkeConfig: {additionalManifest: $dns}}
     }')" >/dev/null
 done
 echo "==> Store records ready; boxes enrol themselves when they boot."

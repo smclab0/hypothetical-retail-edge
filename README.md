@@ -48,6 +48,8 @@ to `hosts.txt`. Store addresses are fixed by the store router's DHCP reservation
 | man-001 | manchester | standard | 1 | 10.120.3.0/24 |
 | edi-001 | edinburgh | standard | 1 | 10.120.4.0/24 |
 | bri-001 | bristol | standard | 1 | 10.120.5.0/24 |
+| gla-001 | glasgow | kiosk (SLES 16 + GNOME) | 1 | 10.120.6.0/24 |
+| liv-001 | liverpool | standard | 1 | HQ LAN `br0` (DHCP) |
 
 ## How a store box onboards
 
@@ -197,6 +199,24 @@ Day 2:
   the store image must be re-rendered and rebuilt after a Rancher rebuild.
 - **Coexistence.** demo-shed and hf-shed are not running. retail-shed uses VIP .251, so it can
   coexist with demo-shed (.252) on br0.
+
+## Store on the HQ LAN (Liverpool)
+
+`liv-001` has `lan` instead of a network number in `stores.txt`. Its box sits on `br0`
+(`172.16.0.0/16`) next to the Rancher nodes and gets its address from the LAN's DHCP.
+`discover-ips.sh` records that address in `hosts.txt`. Liverpool uses the same SL Micro store
+image as the other stores. The differences come from having no store router:
+
+- **Rancher name on the box.** The LAN DNS has no `retail-shed.local` zone. If
+  `rancher.retail-shed.local` doesn't resolve, `retail-enrol` adds it to `/etc/hosts`,
+  pointing at `RANCHER_VIP` from `enrol.env`.
+- **Rancher name in pods.** `setup-stores.sh` gives every new store cluster a
+  `kube-system/coredns-custom` ConfigMap (through Rancher's `additionalManifest`) with a
+  `retail-shed.local` zone. K3s's CoreDNS imports it, so `cattle-cluster-agent` and
+  `fleet-agent` resolve the name on any network.
+- **No WAN simulation and no isolation.** There is no store bridge to shape, so `wan.sh`,
+  `create-networks.sh` and `cleanup-platform.sh networks` skip `lan` stores. The box can
+  reach, and be reached by, everything on the HQ LAN.
 
 ## Kiosk store (Glasgow)
 

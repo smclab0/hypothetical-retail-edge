@@ -1,4 +1,5 @@
-# Written by discover-ips.sh 2026-10-01T15:04:40+01:00
+# Written by discover-ips.sh 2026-10-02T12:22:30+01:00
 retail-rancher01   172.16.0.133
 retail-rancher02   172.16.0.134
 retail-rancher03   172.16.0.135
+store-liv-001-n1   172.16.0.71

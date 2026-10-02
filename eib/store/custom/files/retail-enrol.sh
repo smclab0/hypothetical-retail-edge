@@ -4,8 +4,9 @@
 # created the cluster store-<store> in Rancher, then runs that cluster's
 # registration command. Every store node gets etcd + control plane + worker.
 #
-# /etc/retail-enrol/enrol.env holds RANCHER_URL and ENROL_TOKEN, a read-only
-# Rancher token that can only list clusters and their registration tokens.
+# /etc/retail-enrol/enrol.env holds RANCHER_URL, RANCHER_VIP and ENROL_TOKEN,
+# a read-only Rancher token that can only list clusters and their
+# registration tokens.
 set -euo pipefail
 
 source /etc/retail-enrol/enrol.env
@@ -22,6 +23,14 @@ fi
 store=${BASH_REMATCH[1]}
 cluster="store-${store}"
 hostnamectl set-hostname "$serial"
+
+# A store router answers the Rancher name; a box on the HQ LAN has no DNS for
+# it, so pin it to the HQ VIP
+rancher_host=${RANCHER_URL#https://}
+if ! getent hosts "$rancher_host" >/dev/null && [ -n "${RANCHER_VIP:-}" ]; then
+  echo "${RANCHER_VIP} ${rancher_host}" >>/etc/hosts
+  echo "no DNS for ${rancher_host}: pinned to ${RANCHER_VIP} in /etc/hosts"
+fi
 echo "box ${serial}: enrolling into ${cluster}"
 
 api() { curl -sf --max-time 20 -H "Authorization: Bearer ${ENROL_TOKEN}" "${RANCHER_URL}$1"; }

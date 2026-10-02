@@ -70,12 +70,12 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
   <header>
     <div class="eyebrow">SUSE Edge retail lab · vrack0</div>
     <h1>retail-shed estate</h1>
-    <p class="lede">An HQ Rancher cluster with no load-balancer VMs, six store sites on isolated networks, and one till app delivered to all of them from Git. Every store connection is outbound: nothing at HQ ever dials into a store.</p>
+    <p class="lede">An HQ Rancher cluster with no load-balancer VMs and seven stores: six on isolated store networks and Liverpool on the HQ LAN, where a phone can open its till. One till app reaches all of them from Git, and every store connection to HQ is outbound.</p>
   </header>
 
   <figure>
     <div class="scroll">
-      <svg viewBox="0 0 1200 808" role="img" aria-label="retail-shed topology. HQ: three RKE2 nodes running Rancher Prime; MetalLB announces VIP 172.16.0.251, shared by the kubernetes-vip service on 6443 and 9345, whose endpoints Endpoint Copier Operator copies from the apiservers, and by the ingress on 80 and 443. Fleet in Rancher polls the GitHub repo every 30 seconds. Six stores sit on separate libvirt NAT networks on vrack0, where wan.sh shapes each store's link. Store agents dial out through NAT to the VIP on 443, and store nodes pull the store-pos image from ghcr.io.">
+      <svg viewBox="0 0 1200 980" role="img" aria-label="retail-shed topology. The Liverpool store box sits on the HQ LAN at 172.16.0.71 and its agents reach the VIP directly; an iPhone on the LAN Wi-Fi opens its till over HTTP. HQ: three RKE2 nodes running Rancher Prime; MetalLB announces VIP 172.16.0.251, shared by the kubernetes-vip service on 6443 and 9345, whose endpoints Endpoint Copier Operator copies from the apiservers, and by the ingress on 80 and 443. Fleet in Rancher polls the GitHub repo every 30 seconds. Six stores sit on separate libvirt NAT networks on vrack0, where wan.sh shapes each store's link. Store agents dial out through NAT to the VIP on 443, and store nodes pull the store-pos image from ghcr.io.">
         <defs>
           <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="currentColor"/></marker>
           <marker id="ara" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="var(--accent)"/></marker>
@@ -95,12 +95,12 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
         <text x="985" y="51" text-anchor="middle" font-size="11" class="mono muted">smclab0/store-pos:1.0.0</text>
 
         <!-- vrack0 -->
-        <rect x="20" y="84" width="1160" height="712" rx="6" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="6 5"/>
+        <rect x="20" y="84" width="1160" height="780" rx="6" fill="none" stroke="currentColor" stroke-opacity=".55" stroke-dasharray="6 5"/>
         <text x="36" y="104" font-size="12" class="mono muted">vrack0 · KVM host 172.16.0.69 · 48 threads · 377 GB</text>
 
         <!-- HQ zone -->
-        <rect x="40" y="116" width="470" height="664" rx="4" fill="var(--zone)"/>
-        <text x="56" y="138" font-size="15" class="disp">HQ · bridge br0 · 172.16.0.0/16</text>
+        <rect x="40" y="116" width="470" height="732" rx="4" fill="var(--zone)"/>
+        <text x="56" y="138" font-size="15" class="disp">HQ LAN · bridge br0 · 172.16.0.0/16</text>
 
         <rect x="60" y="152" width="430" height="50" rx="4" fill="var(--panel)" stroke="var(--line)"/>
         <text x="76" y="173" font-size="13" font-weight="600">Rancher Fleet</text>
@@ -146,6 +146,29 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
         <text x="76" y="630" font-size="11" class="muted">MetalLB re-announces .251 from a surviving node</text>
         <text x="76" y="647" font-size="11" class="muted">(gratuitous ARP). No HAProxy or keepalived VMs.</text>
         <text x="76" y="664" font-size="11" class="mono muted">Nodes 02 and 03 joined via https://.251:9345</text>
+
+        <!-- Liverpool: a store box on the HQ LAN itself -->
+        <rect x="60" y="690" width="430" height="140" rx="4" fill="var(--panel)" stroke="var(--accent)"/>
+        <text x="76" y="714" font-size="15" class="disp">liv-001 · store on the HQ LAN</text>
+        <text x="76" y="733" font-size="11" class="mono muted">store-liv-001-n1 · 172.16.0.71 (DHCP)</text>
+        <text x="76" y="751" font-size="11" class="muted">liverpool · SL Micro · 1 × K3s</text>
+        <text x="76" y="776" font-size="11" class="muted">No store router or NAT: agents reach .251 directly.</text>
+        <text x="76" y="793" font-size="11" class="muted">Pi-hole resolves the Rancher name (box and CoreDNS</text>
+        <text x="76" y="810" font-size="11" class="muted">fall back to .251 if it does not). No wan.sh shaping.</text>
+        <rect x="404" y="702" width="64" height="24" rx="3" fill="var(--accent-soft)" stroke="var(--accent)"/><text x="436" y="718" text-anchor="middle" font-size="11" class="mono">till</text>
+        <path d="M60 760 L48 760 L48 300 L224 289" fill="none" stroke="var(--accent)" stroke-width="2.2" marker-end="url(#ara)"/>
+        <text x="44" y="640" font-size="10" class="mono acc" transform="rotate(-90 44 640)">agents → :443 direct</text>
+
+        <!-- iPhone on the LAN Wi-Fi -->
+        <rect x="140" y="886" width="46" height="84" rx="9" fill="var(--panel)" stroke="currentColor" stroke-width="1.5"/>
+        <rect x="146" y="896" width="34" height="62" rx="2" fill="var(--accent-soft)"/>
+        <rect x="155" y="890" width="16" height="3" rx="1.5" fill="currentColor"/>
+        <text x="163" y="930" text-anchor="middle" font-size="9" class="mono">till</text>
+        <text x="200" y="908" font-size="13" font-weight="600">iPhone</text>
+        <text x="200" y="926" font-size="11" class="mono muted">Wi-Fi on 172.16.0.0/16</text>
+        <text x="200" y="943" font-size="11" class="mono muted">Safari → http://172.16.0.71/</text>
+        <line x1="163" y1="884" x2="163" y2="834" stroke="currentColor" stroke-opacity=".75" marker-end="url(#ar)"/>
+        <text x="171" y="866" font-size="11" class="mono muted">HTTP :80</text>
 
         <!-- External arrows -->
         <line x1="135" y1="62" x2="232" y2="246" stroke="currentColor" stroke-opacity=".7" marker-end="url(#ar)"/>
@@ -238,7 +261,7 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
         </g>
       </svg>
     </div>
-    <figcaption><b>Every arrow into HQ starts at a store, and none starts at HQ.</b> Store agents dial out through vrack0's NAT to the VIP, so Rancher manages each store, and Fleet delivers the till to it, over connections the store opened. MetalLB holds <code>172.16.0.251</code> inside the HQ cluster, shared by the Kubernetes and RKE2 join ports and the Rancher ingress. Endpoint Copier Operator keeps the VIP pointing at every live apiserver.</figcaption>
+    <figcaption><b>Every arrow into HQ starts at a store, and none starts at HQ.</b> The isolated stores reach the VIP through vrack0's NAT and Liverpool, on the HQ LAN, reaches it directly. Rancher manages each store, and Fleet delivers the till to it, over connections the store opened. MetalLB holds <code>172.16.0.251</code> inside the HQ cluster, shared by the Kubernetes and RKE2 join ports and the Rancher ingress. Endpoint Copier Operator keeps the VIP pointing at every live apiserver.</figcaption>
   </figure>
 
   <div class="grid2">
@@ -271,6 +294,7 @@ td.mono { font: 13px var(--mono); font-variant-numeric: tabular-nums; white-spac
             <tr><td class="mono">man-001</td><td>manchester · standard</td><td><span class="chip on">till</span></td><td>base list</td></tr>
             <tr><td class="mono">edi-001</td><td>edinburgh · standard</td><td><span class="chip on">till</span></td><td>base list, Scottish produce banner</td></tr>
             <tr><td class="mono">bri-001</td><td>bristol · standard</td><td><span class="chip on">till</span></td><td>base list</td></tr>
+            <tr><td class="mono">liv-001</td><td>liverpool · standard</td><td><span class="chip on">till</span></td><td>base list; on the HQ LAN, opened from a phone on 172.16.0.0/16</td></tr>
             <tr><td class="mono">gla-001</td><td>glasgow · kiosk</td><td><span class="chip on">till</span><span class="chip">on screen</span></td><td>base list; Firefox kiosk on the box's display</td></tr>
           </tbody>
         </table>
