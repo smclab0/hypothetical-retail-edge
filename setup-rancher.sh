@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bring up RKE2 on retail-rancher01..03 (addresses from hosts.txt) with an
 # in-cluster VIP instead of external load balancers, then install cert-manager
-# and Rancher Prime through the RKE2 helm-controller.
+# and Rancher (community rancher-stable chart) through the RKE2 helm-controller.
 #
 # VIP (SUSE Edge pattern): MetalLB in L2 mode announces ${VIP} from one node.
 #   - kubernetes-vip (default ns, LoadBalancer, ports 6443 + 9345) has no
@@ -194,7 +194,7 @@ $(sed 's/^/    /' <<<"$INGRESS_VALUES")
 EOF
 
 b64() { base64 -w0 "$1"; }
-echo "==> cert-manager ${CERT_MANAGER_VERSION} and Rancher Prime ${RANCHER_VERSION}"
+echo "==> cert-manager ${CERT_MANAGER_VERSION} and Rancher ${RANCHER_VERSION} (rancher-stable)"
 manifest rancher <<EOF
 apiVersion: v1
 kind: Namespace
@@ -240,7 +240,8 @@ metadata:
   name: rancher
   namespace: kube-system
 spec:
-  repo: https://charts.rancher.com/server-charts/prime
+  # rancher-stable: the community chart repo
+  repo: https://releases.rancher.com/server-charts/stable
   chart: rancher
   version: ${RANCHER_VERSION}
   targetNamespace: cattle-system

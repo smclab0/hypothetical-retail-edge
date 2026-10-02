@@ -1,7 +1,7 @@
 # retail-shed — SUSE Edge retail lab on vrack0
 
 A retail estate in miniature, built on what worked in `hypothetical-K8S-environment`
-(demo-shed). **HQ** is a 3-node HA Rancher Prime with no load-balancer VMs: its VIP
+(demo-shed). **HQ** is a 3-node HA Rancher (community `rancher-stable` chart) with no load-balancer VMs: its VIP
 is held inside the cluster by MetalLB and Endpoint Copier Operator, the SUSE Edge pattern. **Stores** are K3s clusters on SL Micro 6.2 boxes that are "shipped"
 with one generic image and **enrol themselves** at first boot. Each store sits on
 its own isolated LAN behind a simulated WAN link.
@@ -16,7 +16,7 @@ The same drawing, with the enrolment steps and what Fleet gives each store, is i
 
 | Role | Hosts | Image | vCPU / RAM / disk | Network |
 |---|---|---|---|---|
-| Rancher Prime (RKE2 `local`) | retail-rancher01..03 | `rancher/retail-rancher.iso` | 4 / 16 GB / 64 GB | br0, DHCP |
+| Rancher, rancher-stable chart (RKE2 `local`) | retail-rancher01..03 | `rancher/retail-rancher.iso` | 4 / 16 GB / 64 GB | br0, DHCP |
 | Store box | store-`<store>`-n`<N>` | `store/retail-store.iso` (one image for all) | 4 / 8 GB / 64 GB | rtl-`<store>`, fixed 10.120.`<net>`.1`<N>` |
 
 `stores.txt` lists the stores (region, tier, LAN number); `nodes.txt` lists every VM
@@ -144,7 +144,7 @@ Day 2:
 ## Versions
 
 - SL Micro 6.2 (Default self-install ISO) built with Edge Image Builder 1.3.1
-- HQ: RKE2 v1.35.8+rke2r1 (side-loaded RPMs), Rancher Prime 2.15.2, cert-manager v1.21.2,
+- HQ: RKE2 v1.35.8+rke2r1 (side-loaded RPMs), Rancher 2.15.2 from the `rancher-stable` chart (`releases.rancher.com/server-charts/stable`), cert-manager v1.21.2,
   MetalLB 0.16.1 and Endpoint Copier Operator 0.3.0 (SUSE Edge 3.7 charts)
 - Stores: the newest K3s v1.35 that Rancher offers (`setup-stores.sh`; override with `K3S_VERSION`),
   `k3s-selinux` 1.6 side-loaded into the image
